@@ -2,6 +2,7 @@ import Star from '../../assets/svg/star.svg?react'
 import FormField from '../../components/ui/FormField'
 import { formFields } from './formFields'
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 
 export default function FormSection() {
@@ -14,6 +15,12 @@ export default function FormSection() {
         setFormValues(prev => ({ ...prev, [id]: value }))
     }
 
+    const navigate = useNavigate()
+
+    const handleSubmit = (e) => {
+        e.preventDefault()
+        navigate('/confirmed')
+    }
     const requiredFields = formFields.filter(f => f.required).map(f => f.id)
     const isComplete = requiredFields.every(id => {
     const value = formValues[id]
@@ -23,7 +30,7 @@ export default function FormSection() {
     })
 
     return (
-        <form className="flex flex-col gap-4 mt-4 w-full px-4 pb-10">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-4 w-full px-4 pb-10">
             <div className="flex gap-2 items-center font-display font-medium text-[#828282] text-[10px] py-3">
                 <p>Fields tagged with this star are required</p>
                 <Star className="size-3" />
