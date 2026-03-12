@@ -172,8 +172,8 @@ SVGs in `src/assets/svg/` are imported directly as React components via `vite-pl
 ### Usage
 
 ```jsx
-import { ReactComponent as ArrowRight } from '../assets/svg/arrow-right.svg'
-import { ReactComponent as Star }       from '../assets/svg/star.svg'
+import ArrowRight from '../assets/svg/arrow-right.svg?react'
+import Star from '../assets/svg/star.svg?react'
 
 <ArrowRight className="w-5 h-5 text-blue-500" />
 <Star className="w-4 h-4 text-yellow-400" />
