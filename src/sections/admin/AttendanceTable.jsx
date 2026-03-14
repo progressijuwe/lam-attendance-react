@@ -26,7 +26,7 @@ export default function AttendanceTable({ data }) {
           {data.map((entry) => (
             <tr key={entry.id} className="border-b border-[#F5F5F5]">
               <td className="p-3">
-                <img src={`${BASE_URL}/storage/${entry.picture_path}`} alt="" className="w-10 h-10 object-cover" />
+                <img src={entry.picture_path} alt="" className="w-10 h-10 object-cover" />
               </td>
               <td className="p-3 text-[#49526A]">{entry.time}</td>
               <td className="p-3 capitalize">{entry.first_name}</td>
@@ -45,7 +45,7 @@ export default function AttendanceTable({ data }) {
         {data.map((entry) => (
           <div key={entry.id} className="border border-[#F5F5F5]">
             <div className="flex justify-center p-4 bg-[#E9ECEB]">
-              <img src={`${BASE_URL}/storage/${entry.picture_path}`} alt="" className="w-24 h-24 object-cover" />
+              <img src={entry.picture_path} alt="" className="w-24 h-24 object-cover" />
             </div>
             <div className="flex flex-col text-xs font-display">
               <Row label="Time"       value={entry.time} />
