@@ -1,6 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap');
+
 @import "tailwindcss";
 
-
+@theme {
+  --font-display: 'Red Hat Display', serif;
+  --font-body: 'Cairo', sans-serif;
+}
 :root {
   --color-brand: #0f172a;
+}
+@layer base{
+  input, select{
+    outline: none;
+    border: none;
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    display: none;
+  }
 }
