@@ -1,14 +1,16 @@
 import glass from '../../assets/images/glass.png'
+import { useLocation } from 'react-router-dom'
 
 export default function ConfirmationSection(){
-
+    const { state } = useLocation()
+    const name = state ? `${state.firstName} ${state.lastName}` : ''
 
     return(
         <section className="mt-10 px-4">
             <div className="border-4 border-[#A8941F] p-4 flex flex-col gap-4">
                 <div className="flex flex-col gap-4 py-[33.5px] px-4 items-center border border-[#D2E1DA]">
-                    <p className="font-display text-sm text-black">Your attendance has been recorded</p>
-                    <h1 className="font-body text-xl font-semibold">John Okor</h1>
+                    <p className="font-display text-center text-sm text-black">Your attendance has been recorded</p>
+                    <h1 className="font-body text-xl font-semibold">{name}</h1>
                 </div>
                 <div className="py-7.5 flex flex-col items-center gap-4">
                     <img src={glass} alt='Celebration Glass Image' />

@@ -10,7 +10,7 @@ export default function FormField({ type, id, name, label, required, placeholder
     const renderField = () => {
         if (type === 'select') {
         return (
-            <select id={id} defaultValue="" name={name} onChange={handleChange} className="border rounded px-3 py-2 w-full">
+            <select id={id} defaultValue="" name={name} onChange={handleChange} className="text-sm font-semibold rounded px-2.5 py-3.75 w-full">
                 <option value="" disabled>Select {label}</option>
                 {options?.filter(opt => opt.value !== '').map(opt => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
