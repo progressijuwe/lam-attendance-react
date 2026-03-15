@@ -1,3 +1,13 @@
+A full-stack church attendance management system built with React and Laravel.
+
+Members submit their attendance via a form that captures their name, department,
+and a live photo. The system automatically records the time and determines whether
+they are on time or late based on configurable day-specific cutoff times.
+
+Admins access a protected dashboard to view, filter, and paginate all attendance
+records in real time. The dashboard is secured with token-based authentication
+via Laravel Sanctum.
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
