@@ -3,10 +3,12 @@ import FormField from '../../components/ui/FormField'
 import { formFields } from './formFields'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useLocationGuard } from '../../hooks/useLocationGuard'
 import api from '../../lib/api'
 
 export default function FormSection() {
     const navigate = useNavigate()
+    const { coords } = useLocationGuard() 
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
     const [formToken, setFormToken] = useState(null)
@@ -39,11 +41,13 @@ export default function FormSection() {
         setError(null)
 
         try {
-        const formData = new FormData()
-        formData.append('first_name', formValues.firstName)
-        formData.append('last_name',  formValues.lastName)
-        formData.append('department', formValues.department)
-        formData.append('live_image', formValues.liveImage)
+            const formData = new FormData()
+            formData.append('first_name', formValues.firstName)
+            formData.append('last_name',  formValues.lastName)
+            formData.append('department', formValues.department)
+            formData.append('live_image', formValues.liveImage)
+            formData.append('lat', coords.latitude)
+            formData.append('lng', coords.longitude)
 
         await api.post('/api/attendance', formData, {
             headers: { 'X-Form-Token': formToken }
