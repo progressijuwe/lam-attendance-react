@@ -67,30 +67,30 @@ export default function FormSection() {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-4 w-full px-4 pb-10">
-        <div className="flex gap-2 items-center font-display font-medium text-[#828282] text-[10px] py-3">
-            <p>Fields tagged with this star are required</p>
-            <Star className="size-3" />
-        </div>
-        <div className="flex flex-col gap-4">
-            {formFields.map((field) => (
-            <FormField key={field.id} {...field} onChange={handleChange} />
-            ))}
-        </div>
-        {error && (
-            <p className="text-red-500 text-xs text-center">{error}</p>
-        )}
-        <button
-            type='submit'
-            disabled={!isComplete || loading || !formToken}
-            className={`font-display h-10 w-full text-sm font-semibold border transition-colors
-            ${isComplete && !loading && formToken
-                ? 'text-[#000000] border-[#033B21] bg-[#1DDF85] cursor-pointer'
-                : 'text-[#999999] border-[#D2E1DA] bg-[#E9ECEB] cursor-not-allowed'
-            }`}
-        >
-            {loading ? 'Submitting...' : 'Submit'}
-        </button>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-4 w-full px-4 pb-10 xl:px-32">
+            <div className="flex gap-2 items-center font-display font-medium text-[#828282] text-[10px] py-3">
+                <p>Fields tagged with this star are required</p>
+                <Star className="size-3" />
+            </div>
+            <div className="flex flex-col gap-4">
+                {formFields.map((field) => (
+                <FormField key={field.id} {...field} onChange={handleChange} />
+                ))}
+            </div>
+            {error && (
+                <p className="text-red-500 text-xs text-center">{error}</p>
+            )}
+            <button
+                type='submit'
+                disabled={!isComplete || loading || !formToken}
+                className={`font-display h-10 w-full text-sm font-semibold border transition-colors
+                ${isComplete && !loading && formToken
+                    ? 'text-[#000000] border-[#033B21] bg-[#1DDF85] cursor-pointer'
+                    : 'text-[#999999] border-[#D2E1DA] bg-[#E9ECEB] cursor-not-allowed'
+                }`}
+            >
+                {loading ? 'Submitting...' : 'Submit'}
+            </button>
         </form>
     )
 }

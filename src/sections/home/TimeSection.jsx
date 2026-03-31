@@ -49,7 +49,7 @@ export default function TimeSection (){
     }, [])
 
     return(
-        <section className="flex flex-col gap-4 pt-10 px-4">
+        <section className="flex flex-col w-full gap-4 pt-10 px-4 xl:px-32">
             <Greeting hour ={timeParts.hour24}/>
             <div className="flex flex-col font-body text-[#423A0C]">
                 <div className="flex justify-center w-full p-10 bg-[#FFF098]">

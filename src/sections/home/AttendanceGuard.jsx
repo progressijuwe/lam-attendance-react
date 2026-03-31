@@ -45,7 +45,7 @@ function DistanceMeter({ distance }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
-        <span className="font-mono text-xs font-medium px-2.5 py-1 rounded-full bg-red-50 text-red-600">
+        <span className="font-body text-xs font-medium px-2.5 py-1 rounded-full bg-red-50 text-red-600">
           {distance} m away
         </span>
         <span className="text-sm text-stone-400">must be within 50 m</span>
@@ -105,7 +105,7 @@ export default function AttendanceGuard({ children }) {
   const cfg = STATE_CONFIG[status];
 
   return (
-    <div className="min-h-screen bg-stone-50 flex items-center justify-center px-4 py-12">
+    <div className="bg-stone-50 flex items-center justify-center px-4 py-12 xl:px-32">
       <div className="w-full max-w-sm">
 
         {/* Card */}
@@ -152,13 +152,35 @@ export default function AttendanceGuard({ children }) {
             {/* Denied — step list + retry */}
             {status === "denied" && (
               <>
-                <StepList steps={cfg.steps} />
+                {permissionState === "denied" ? (
+                  // Explicitly blocked — guide them to settings
+                  <StepList steps={[
+                    "Tap the AA or lock icon in Safari's address bar",
+                    "Tap 'Website Settings'",
+                    "Set Location to 'Allow'",
+                    "Come back and tap retry below",
+                  ]} />
+                ) : (
+                  // Never asked yet — prompt will appear when they tap
+                  <p className="text-sm text-stone-500 leading-relaxed">
+                    Tap the button below and allow location access when Safari prompts you.
+                  </p>
+                )}
                 <button
                   onClick={retry}
                   className="w-full py-2.5 rounded-xl border border-stone-200 text-sm font-medium text-stone-600 bg-stone-50 hover:bg-stone-100 active:scale-[0.98] transition-all"
                 >
-                  I've enabled location — retry
+                  {permissionState === "denied"
+                    ? "I've enabled location — retry"
+                    : "Allow location access"}
                 </button>
+
+                {/* unavailable state */}
+                {status === "unavailable" && (
+                  <p className="text-xs text-stone-400 text-center">
+                    Could not get your position. Make sure GPS is enabled on your device.
+                  </p>
+                )}
               </>
             )}
 
