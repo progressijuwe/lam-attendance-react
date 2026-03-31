@@ -3,7 +3,7 @@ import { CHURCH_LOCATION } from "../lib/config";
 import { getDistanceMeters } from "../lib/utils";
 
 export function useLocationGuard() {
-  const [status, setStatus] = useState("idle"); 
+  const [status, setStatus] = useState("idle");
   // idle | checking | allowed | blocked | denied | unavailable
 
   const [distance, setDistance] = useState(null);
@@ -12,13 +12,22 @@ export function useLocationGuard() {
   const [permissionState, setPermissionState] = useState(null);
 
   const watchIdRef = useRef(null);
+  const timeoutRef = useRef(null);
 
-  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  const isSafari =
+    typeof navigator !== "undefined" &&
+    /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
-  const clearWatch = () => {
+  // 🔥 Clear everything safely
+  const clearAll = () => {
     if (watchIdRef.current !== null) {
       navigator.geolocation.clearWatch(watchIdRef.current);
       watchIdRef.current = null;
+    }
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
   };
 
@@ -32,38 +41,37 @@ export function useLocationGuard() {
       CHURCH_LOCATION.lng
     );
 
+    const roundedDistance = Math.round(dist);
+    const roundedAccuracy = Math.round(accuracy);
+
     setCoords({ latitude, longitude });
-    setAccuracy(Math.round(accuracy));
-    setDistance(Math.round(dist));
+    setAccuracy(roundedAccuracy);
+    setDistance(roundedDistance);
 
-    // 🧠 IMPORTANT: factor in GPS accuracy
-    const effectiveDistance = dist - accuracy;
+    // 🔥 Better accuracy handling (expand radius instead)
+    const effectiveRadius =
+      CHURCH_LOCATION.radiusMeters + roundedAccuracy;
 
-    if (effectiveDistance <= CHURCH_LOCATION.radiusMeters) {
-      setStatus("allowed");
-    } else {
-      setStatus("blocked");
-    }
+    setStatus((prev) => {
+      const nextStatus =
+        dist <= effectiveRadius ? "allowed" : "blocked";
+
+      return prev === nextStatus ? prev : nextStatus;
+    });
   };
 
   const handleError = (error) => {
-    clearWatch();
+    clearAll();
 
     switch (error.code) {
       case 1:
-        // Permission denied
         setStatus("denied");
         break;
       case 2:
-        // Position unavailable
-        setStatus("unavailable");
-        break;
       case 3:
-        // Timeout
-        setStatus("unavailable");
-        break;
       default:
         setStatus("unavailable");
+        break;
     }
   };
 
@@ -76,9 +84,8 @@ export function useLocationGuard() {
     setStatus("checking");
     setDistance(null);
 
-    clearWatch();
+    clearAll();
 
-    // 🚀 Use watchPosition for better accuracy stabilization
     watchIdRef.current = navigator.geolocation.watchPosition(
       handleSuccess,
       handleError,
@@ -89,13 +96,13 @@ export function useLocationGuard() {
       }
     );
 
-    // ⛔ Stop watching after a short period (avoid battery drain)
-    setTimeout(() => {
-      clearWatch();
+    // Stop watching after 12s
+    timeoutRef.current = setTimeout(() => {
+      clearAll();
     }, 12000);
   }, []);
 
-  // ✅ Handle permission state (ONLY where reliable)
+  // Permission handling (non-Safari only)
   useEffect(() => {
     if (!navigator.permissions || isSafari) {
       setStatus("idle");
@@ -136,11 +143,9 @@ export function useLocationGuard() {
     };
   }, [requestLocation, isSafari]);
 
-  // ✅ Retry automatically when user comes back from settings
   useEffect(() => {
     const handleVisibility = () => {
       if (document.visibilityState === "visible") {
-        // Retry silently if they previously denied
         if (status === "denied" || status === "unavailable") {
           setStatus("idle");
         }
@@ -150,13 +155,15 @@ export function useLocationGuard() {
     document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
-      document.removeEventListener("visibilitychange", handleVisibility);
+      document.removeEventListener(
+        "visibilitychange",
+        handleVisibility
+      );
     };
   }, [status]);
 
-  // ✅ Cleanup
   useEffect(() => {
-    return () => clearWatch();
+    return () => clearAll();
   }, []);
 
   return {
