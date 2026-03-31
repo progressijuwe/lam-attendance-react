@@ -4,8 +4,6 @@ import { getDistanceMeters } from "../lib/utils";
 
 export function useLocationGuard() {
   const [status, setStatus] = useState("idle");
-  // idle | checking | allowed | blocked | denied | unavailable
-
   const [distance, setDistance] = useState(null);
   const [coords, setCoords] = useState(null);
   const [accuracy, setAccuracy] = useState(null);
@@ -18,7 +16,6 @@ export function useLocationGuard() {
     typeof navigator !== "undefined" &&
     /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
-  // 🔥 Clear everything safely
   const clearAll = () => {
     if (watchIdRef.current !== null) {
       navigator.geolocation.clearWatch(watchIdRef.current);
@@ -31,7 +28,7 @@ export function useLocationGuard() {
     }
   };
 
-  const handleSuccess = (pos) => {
+  const processPosition = (pos) => {
     const { latitude, longitude, accuracy } = pos.coords;
 
     const dist = getDistanceMeters(
@@ -44,11 +41,12 @@ export function useLocationGuard() {
     const roundedDistance = Math.round(dist);
     const roundedAccuracy = Math.round(accuracy);
 
+    console.log("GEO SUCCESS:", { roundedDistance, roundedAccuracy });
+
     setCoords({ latitude, longitude });
     setAccuracy(roundedAccuracy);
     setDistance(roundedDistance);
 
-    // 🔥 Better accuracy handling (expand radius instead)
     const effectiveRadius =
       CHURCH_LOCATION.radiusMeters + roundedAccuracy;
 
@@ -61,6 +59,8 @@ export function useLocationGuard() {
   };
 
   const handleError = (error) => {
+    console.log("GEO ERROR:", error); // 🔥 IMPORTANT DEBUG
+
     clearAll();
 
     switch (error.code) {
@@ -86,8 +86,22 @@ export function useLocationGuard() {
 
     clearAll();
 
-    watchIdRef.current = navigator.geolocation.watchPosition(
-      handleSuccess,
+    // 🔥 SAFARI FIX: try getCurrentPosition FIRST
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        processPosition(pos);
+
+        // ✅ Then start watching for better accuracy
+        watchIdRef.current = navigator.geolocation.watchPosition(
+          processPosition,
+          handleError,
+          {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0,
+          }
+        );
+      },
       handleError,
       {
         enableHighAccuracy: true,
@@ -96,53 +110,34 @@ export function useLocationGuard() {
       }
     );
 
-    // Stop watching after 12s
+    // ⛔ Stop watching after 12s
     timeoutRef.current = setTimeout(() => {
       clearAll();
     }, 12000);
   }, []);
 
-  // Permission handling (non-Safari only)
+  // ✅ Permissions (skip for Safari)
   useEffect(() => {
     if (!navigator.permissions || isSafari) {
       setStatus("idle");
       return;
     }
 
-    let mounted = true;
-
     navigator.permissions
       .query({ name: "geolocation" })
       .then((result) => {
-        if (!mounted) return;
-
         setPermissionState(result.state);
 
         if (result.state === "granted") {
           requestLocation();
-        } else {
-          setStatus("idle");
         }
-
-        result.onchange = () => {
-          setPermissionState(result.state);
-
-          if (result.state === "granted") {
-            requestLocation();
-          } else {
-            setStatus("idle");
-          }
-        };
       })
       .catch(() => {
         setStatus("idle");
       });
-
-    return () => {
-      mounted = false;
-    };
   }, [requestLocation, isSafari]);
 
+  // ✅ Reset when returning to tab
   useEffect(() => {
     const handleVisibility = () => {
       if (document.visibilityState === "visible") {
