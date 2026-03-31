@@ -192,11 +192,18 @@ export default function AttendanceGuard({ children }) {
             {/* Denied — step list + retry */}
             {status === "denied" && (
               <>
-                <p className="text-sm text-stone-500 leading-relaxed">
-                  Tap the button below and allow location access when prompted.
-                  If you don’t see a prompt, enable location in your browser settings.
+                <StepList
+                  steps={[
+                    "Tap the button below to allow location access",
+                    "If no prompt appears, open your device Settings",
+                    "Go to Privacy & Security → Location Services",
+                    "Tap 'Safari Websites' and set it to 'Ask Next Time'",
+                    "Return here and tap retry",
+                  ]}
+                />
+                <p className="text-xs text-stone-400">
+                  iPhone users: Safari may block location without prompting if previously denied.
                 </p>
-
                 <button
                   onClick={retry}
                   type="button"
