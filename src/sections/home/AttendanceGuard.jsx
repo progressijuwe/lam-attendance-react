@@ -94,10 +94,16 @@ const STATE_CONFIG = {
       "Reload the page and try again",
     ],
   },
+  unavailable: {
+    icon: <AlertIcon />,
+    iconBg: "bg-stone-100 text-stone-400",
+    title: "Position unavailable",
+    subtitle: "Could not get your GPS position. Make sure location services are enabled on your device.",
+  },
 };
 
 export default function AttendanceGuard({ children }) {
-  const { status, distance, retry } = useLocationGuard();
+  const { status, distance, permissionState, retry } = useLocationGuard();
 
   // Pass through to the form
   if (status === "allowed") return children;
@@ -174,13 +180,21 @@ export default function AttendanceGuard({ children }) {
                     ? "I've enabled location — retry"
                     : "Allow location access"}
                 </button>
-
-                {/* unavailable state */}
-                {status === "unavailable" && (
-                  <p className="text-xs text-stone-400 text-center">
-                    Could not get your position. Make sure GPS is enabled on your device.
-                  </p>
-                )}
+              </>
+            )}
+            
+            {/* Unavailable — GPS off or timeout */}
+            {status === "unavailable" && (
+              <>
+                <p className="text-sm text-stone-500 leading-relaxed">
+                  Could not get your position. Make sure GPS is enabled on your device.
+                </p>
+                <button
+                  onClick={retry}
+                  className="w-full py-2.5 rounded-xl border border-stone-200 text-sm font-medium text-stone-600 bg-stone-50 hover:bg-stone-100 active:scale-[0.98] transition-all"
+                >
+                  Try again
+                </button>
               </>
             )}
 
