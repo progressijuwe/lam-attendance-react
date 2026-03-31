@@ -39,23 +39,32 @@ function StepList({ steps }) {
   );
 }
 
-function DistanceMeter({ distance }) {
+function DistanceMeter({ distance, accuracy }) {
   const cappedPct = Math.min((distance / 400) * 100, 100);
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         <span className="font-body text-xs font-medium px-2.5 py-1 rounded-full bg-red-50 text-red-600">
           {distance} m away
         </span>
+
+        {accuracy !== null && (
+          <span className="text-xs text-amber-500">
+            ±{accuracy} m accuracy
+          </span>
+        )}
+
         <span className="text-sm text-stone-400">must be within 50 m</span>
       </div>
+
       <div className="h-1 rounded-full bg-stone-100 overflow-hidden">
         <div
           className="h-full rounded-full bg-red-400 transition-all duration-700 ease-out"
           style={{ width: `${cappedPct}%` }}
         />
       </div>
+
       <div className="flex justify-between text-[11px] text-stone-300">
         <span>0 m</span>
         <span>50 m limit</span>
@@ -109,10 +118,12 @@ const STATE_CONFIG = {
 };
 
 export default function AttendanceGuard({ children }) {
-  const { status, distance, permissionState, retry } = useLocationGuard();
+  const { status, distance, accuracy, permissionState, retry } = useLocationGuard();
 
   // Pass through to the form
-  if (status === "allowed") return children;
+  if (status === "allowed" && distance !== null) {
+    return children;
+  }
 
   const cfg = STATE_CONFIG[status];
 
@@ -149,7 +160,8 @@ export default function AttendanceGuard({ children }) {
             {status === "idle" && (
               <button
                 onClick={retry}
-                className="w-full py-2.5 rounded-xl border border-stone-200 text-sm font-medium text-stone-600 bg-stone-50 hover:bg-stone-100 active:scale-[0.98] transition-all"
+                type="button"
+                className="w-full py-2.5 cursor-pointer rounded-xl border border-stone-200 text-sm font-medium text-stone-600 bg-stone-50 hover:bg-stone-100 active:scale-[0.98] transition-all"
               >
                 Check my location
               </button>
@@ -161,10 +173,16 @@ export default function AttendanceGuard({ children }) {
             {/* Blocked — distance meter + retry */}
             {status === "blocked" && (
               <>
-                <DistanceMeter distance={distance} />
+                <DistanceMeter distance={distance} accuracy={accuracy} />
+                {accuracy !== null && accuracy > 50 && (
+                  <p className="text-xs text-amber-500">
+                    GPS signal is weak. Move closer to an open area for better accuracy.
+                  </p>
+                )}
                 <button
                   onClick={retry}
-                  className="w-full py-2.5 rounded-xl border border-stone-200 text-sm font-medium text-stone-600 bg-stone-50 hover:bg-stone-100 active:scale-[0.98] transition-all"
+                  type='button'
+                  className="w-full py-2.5 cursor-pointer rounded-xl border border-stone-200 text-sm font-medium text-stone-600 bg-stone-50 hover:bg-stone-100 active:scale-[0.98] transition-all"
                 >
                   Try again
                 </button>
@@ -174,27 +192,17 @@ export default function AttendanceGuard({ children }) {
             {/* Denied — step list + retry */}
             {status === "denied" && (
               <>
-                {permissionState === "denied" ? (
-                  // Explicitly blocked — guide them to settings
-                  <StepList steps={[
-                    "Tap the AA or lock icon in Safari's address bar",
-                    "Tap 'Website Settings'",
-                    "Set Location to 'Allow'",
-                    "Come back and tap retry below",
-                  ]} />
-                ) : (
-                  // Never asked yet — prompt will appear when they tap
-                  <p className="text-sm text-stone-500 leading-relaxed">
-                    Tap the button below and allow location access when Safari prompts you.
-                  </p>
-                )}
+                <p className="text-sm text-stone-500 leading-relaxed">
+                  Tap the button below and allow location access when prompted.
+                  If you don’t see a prompt, enable location in your browser settings.
+                </p>
+
                 <button
                   onClick={retry}
-                  className="w-full py-2.5 rounded-xl border border-stone-200 text-sm font-medium text-stone-600 bg-stone-50 hover:bg-stone-100 active:scale-[0.98] transition-all"
+                  type="button"
+                  className="w-full cursor-pointer py-2.5 rounded-xl border border-stone-200 text-sm font-medium text-stone-600 bg-stone-50 hover:bg-stone-100 active:scale-[0.98] transition-all"
                 >
-                  {permissionState === "denied"
-                    ? "I've enabled location — retry"
-                    : "Allow location access"}
+                  Retry location access
                 </button>
               </>
             )}
@@ -207,7 +215,8 @@ export default function AttendanceGuard({ children }) {
                 </p>
                 <button
                   onClick={retry}
-                  className="w-full py-2.5 rounded-xl border border-stone-200 text-sm font-medium text-stone-600 bg-stone-50 hover:bg-stone-100 active:scale-[0.98] transition-all"
+                  type="button"
+                  className="w-full cursor-pointer py-2.5 rounded-xl border border-stone-200 text-sm font-medium text-stone-600 bg-stone-50 hover:bg-stone-100 active:scale-[0.98] transition-all"
                 >
                   Try again
                 </button>
@@ -219,7 +228,7 @@ export default function AttendanceGuard({ children }) {
 
         {/* Footer note */}
         <p className="text-center text-xs text-stone-300 mt-4">
-          Your location is only used to verify attendance and is not stored.
+          Your location is only used to verify attendance and is never stored or shared.
         </p>
 
       </div>
