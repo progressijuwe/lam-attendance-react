@@ -66,6 +66,12 @@ function DistanceMeter({ distance }) {
 }
 
 const STATE_CONFIG = {
+  idle: {
+    icon: <PinIcon />,
+    iconBg: "bg-blue-50 text-blue-500",
+    title: "Location required",
+    subtitle: "We need to confirm you're at the church before marking attendance.",
+  },
   checking: {
     icon: <ClockIcon />,
     iconBg: "bg-blue-50 text-blue-500",
@@ -138,6 +144,16 @@ export default function AttendanceGuard({ children }) {
 
           {/* Body */}
           <div className="p-5 flex flex-col gap-4">
+
+            {/* Idle — prompt not yet triggered */}
+            {status === "idle" && (
+              <button
+                onClick={retry}
+                className="w-full py-2.5 rounded-xl border border-stone-200 text-sm font-medium text-stone-600 bg-stone-50 hover:bg-stone-100 active:scale-[0.98] transition-all"
+              >
+                Check my location
+              </button>
+            )}
 
             {/* Checking — step list */}
             {status === "checking" && <StepList steps={cfg.steps} />}
