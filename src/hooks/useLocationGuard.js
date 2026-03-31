@@ -42,4 +42,4 @@ export function useLocationGuard() {
   }, []);
 
   return { status, distance, coords, retry: check };
-}x
+}
