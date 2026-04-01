@@ -1,5 +1,5 @@
 export const CHURCH_LOCATION = {
-  lat: 9.058736,
-  lng: 7.417187,  
+  lat: 4.817184, 
+  lng: 6.973659,  
   radiusMeters: 50,
 };

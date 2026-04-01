@@ -59,7 +59,7 @@ export function useLocationGuard() {
   };
 
   const handleError = (error) => {
-    console.log("GEO ERROR:", error); // 🔥 IMPORTANT DEBUG
+    console.log("GEO ERROR:", error);
 
     clearAll();
 
@@ -86,12 +86,12 @@ export function useLocationGuard() {
 
     clearAll();
 
-    // 🔥 SAFARI FIX: try getCurrentPosition FIRST
+    // SAFARI FIX: try getCurrentPosition FIRST
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         processPosition(pos);
 
-        // ✅ Then start watching for better accuracy
+        // Then start watching for better accuracy
         watchIdRef.current = navigator.geolocation.watchPosition(
           processPosition,
           handleError,
@@ -110,13 +110,13 @@ export function useLocationGuard() {
       }
     );
 
-    // ⛔ Stop watching after 12s
+    //Stop watching after 12s
     timeoutRef.current = setTimeout(() => {
       clearAll();
     }, 12000);
   }, []);
 
-  // ✅ Permissions (skip for Safari)
+  // Permissions (skip for Safari)
   useEffect(() => {
     if (!navigator.permissions || isSafari) {
       setStatus("idle");
@@ -137,7 +137,7 @@ export function useLocationGuard() {
       });
   }, [requestLocation, isSafari]);
 
-  // ✅ Reset when returning to tab
+  // Reset when returning to tab
   useEffect(() => {
     const handleVisibility = () => {
       if (document.visibilityState === "visible") {
