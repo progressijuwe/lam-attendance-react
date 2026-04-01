@@ -1,4 +1,3 @@
-import { BASE_URL } from '../../lib/api'
 
 export default function AttendanceTable({ data }) {
   if (data.length === 0) {
@@ -10,7 +9,6 @@ export default function AttendanceTable({ data }) {
   }
   return (
     <div>
-      {/* DESKTOP — table */}
       <table className="hidden md:table w-full text-xs font-display">
         <thead>
           <tr className="border-b border-[#F5F5F5]">
@@ -31,7 +29,7 @@ export default function AttendanceTable({ data }) {
               <td className="p-3 text-[#49526A]">{entry.time}</td>
               <td className="p-3 capitalize">{entry.first_name}</td>
               <td className="p-3 capitalize">{entry.last_name}</td>
-              <td className="p-3 capitalize">{entry.department}</td>
+              <td className="p-3 capitalize">{entry.department_label}</td>
               <td className="p-3">
                 <StatusBadge status={entry.status} />
               </td>
@@ -40,7 +38,6 @@ export default function AttendanceTable({ data }) {
         </tbody>
       </table>
 
-      {/* MOBILE — cards */}
       <div className="flex flex-col gap-4 md:hidden p-4">
         {data.map((entry) => (
           <div key={entry.id} className="border border-[#F5F5F5]">
