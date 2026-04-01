@@ -117,8 +117,8 @@ const STATE_CONFIG = {
   },
 };
 
-export default function AttendanceGuard({ children }) {
-  const { status, distance, accuracy, permissionState, retry } = useLocationGuard();
+export default function AttendanceGuard({ children, locationGuard }) {
+  const { status, distance, accuracy, retry } = locationGuard;
 
   // Pass through to the form
   if (status === "allowed" && distance !== null) {

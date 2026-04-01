@@ -3,12 +3,10 @@ import FormField from '../../components/ui/FormField'
 import { formFields } from './formFields'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useLocationGuard } from '../../hooks/useLocationGuard'
 import api from '../../lib/api'
 
-export default function FormSection() {
+export default function FormSection({ coords, accuracy }) {
     const navigate = useNavigate()
-    const { coords } = useLocationGuard() 
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
     const [formToken, setFormToken] = useState(null)
@@ -48,6 +46,7 @@ export default function FormSection() {
             formData.append('live_image', formValues.liveImage)
             formData.append('lat', coords.latitude)
             formData.append('lng', coords.longitude)
+            formData.append('accuracy', accuracy)
 
         await api.post('/api/attendance', formData, {
             headers: { 'X-Form-Token': formToken }
