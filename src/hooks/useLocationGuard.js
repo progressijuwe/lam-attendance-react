@@ -47,19 +47,16 @@ export function useLocationGuard() {
     setAccuracy(roundedAccuracy);
     setDistance(roundedDistance);
 
-    const effectiveRadius =
-      CHURCH_LOCATION.radiusMeters + roundedAccuracy;
+    const effectiveRadius = CHURCH_LOCATION.radiusMeters + roundedAccuracy;
 
     setStatus((prev) => {
-      const nextStatus =
-        dist <= effectiveRadius ? "allowed" : "blocked";
-
+      const nextStatus = dist <= effectiveRadius ? "allowed" : "blocked";
       return prev === nextStatus ? prev : nextStatus;
     });
   };
 
   const handleError = (error) => {
-    console.log("GEO ERROR:", error); // 🔥 IMPORTANT DEBUG
+    console.log("GEO ERROR:", error);
 
     clearAll();
 
@@ -86,58 +83,52 @@ export function useLocationGuard() {
 
     clearAll();
 
-    // 🔥 SAFARI FIX: try getCurrentPosition FIRST
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         processPosition(pos);
 
-        // ✅ Then start watching for better accuracy
         watchIdRef.current = navigator.geolocation.watchPosition(
           processPosition,
           handleError,
           {
             enableHighAccuracy: true,
-            timeout: 15000,
-            maximumAge: 0,
+            timeout: 20000,      // ← increased
+            maximumAge: 30000,   // ← allow 30s cached position
           }
         );
       },
-      handleError,
+      (err) => {
+        // If high accuracy times out, fall back to low accuracy
+        if (err.code === 3) {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              processPosition(pos);
+            },
+            handleError,
+            {
+              enableHighAccuracy: false,  // ← low accuracy fallback
+              timeout: 20000,
+              maximumAge: 60000,          // ← accept up to 1min old position
+            }
+          );
+        } else {
+          handleError(err);
+        }
+      },
       {
         enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 0,
+        timeout: 20000,      // ← increased from 15s
+        maximumAge: 30000,   // ← allow 30s cached position
       }
     );
 
-    // ⛔ Stop watching after 12s
+    // Stop watching after 25s (increased to match)
     timeoutRef.current = setTimeout(() => {
       clearAll();
-    }, 12000);
+    }, 25000);
   }, []);
 
-  // ✅ Permissions (skip for Safari)
-  useEffect(() => {
-    if (!navigator.permissions || isSafari) {
-      setStatus("idle");
-      return;
-    }
-
-    navigator.permissions
-      .query({ name: "geolocation" })
-      .then((result) => {
-        setPermissionState(result.state);
-
-        if (result.state === "granted") {
-          requestLocation();
-        }
-      })
-      .catch(() => {
-        setStatus("idle");
-      });
-  }, [requestLocation, isSafari]);
-
-  // ✅ Reset when returning to tab
+  // Reset when returning to tab
   useEffect(() => {
     const handleVisibility = () => {
       if (document.visibilityState === "visible") {
