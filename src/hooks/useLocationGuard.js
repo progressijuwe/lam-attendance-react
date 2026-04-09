@@ -92,8 +92,8 @@ export function useLocationGuard() {
           handleError,
           {
             enableHighAccuracy: true,
-            timeout: 20000,      // ← increased
-            maximumAge: 30000,   // ← allow 30s cached position
+            timeout: 20000,   
+            maximumAge: 30000,   
           }
         );
       },
@@ -117,18 +117,16 @@ export function useLocationGuard() {
       },
       {
         enableHighAccuracy: true,
-        timeout: 20000,      // ← increased from 15s
-        maximumAge: 30000,   // ← allow 30s cached position
+        timeout: 20000,     
+        maximumAge: 30000, 
       }
     );
 
-    // Stop watching after 25s (increased to match)
     timeoutRef.current = setTimeout(() => {
       clearAll();
     }, 25000);
   }, []);
 
-  // Reset when returning to tab
   useEffect(() => {
     const handleVisibility = () => {
       if (document.visibilityState === "visible") {
